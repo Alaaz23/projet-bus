@@ -1,0 +1,182 @@
+@font-face {
+    font-family: mf;
+    src: url(../../assets/Stevie-Sans-Medium.ttf);
+}
+  
+  .main {
+    font-family:mf;
+    color: #000000;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+    overflow: hidden;
+    }
+  
+  /* LOGIN TITLE */
+  
+  .home{
+    padding-bottom: 3vw;
+  }
+  
+  .intro-text {
+    font-size:4em;
+    color: #f39801;
+    letter-spacing: 3px;
+    font-weight: 500;
+    padding-left: 2em;
+    text-shadow: 
+    1px 1px 0 #f39801,
+    2px 2px 0 #f39801,
+    3px 3px 0 rgba(169, 169, 169, 0.5),
+    4px 4px 0 rgba(169, 169, 169, 0.4),
+    5px 5px 0 rgba(169, 169, 169, 0.3),
+    6px 6px 0 rgba(169, 169, 169, 0.2),
+    7px 7px 0 rgba(169, 169, 169, 0.1),
+    8px 8px 0 rgba(169, 169, 169, 0.09),
+    9px 9px 0 rgba(169, 169, 169, 0.08),
+    10px 10px 0 rgba(169, 169, 169, 0.07),
+    11px 11px 0 rgba(169, 169, 169, 0.06),
+    12px 12px 0 rgba(169, 169, 169, 0.05),
+    13px 13px 0 rgba(169, 169, 169, 0.04),
+    14px 14px 0 rgba(169, 169, 169, 0.03),
+    15px 15px 0 rgba(169, 169, 169, 0.02),
+    16px 16px 0 rgba(169, 169, 169, 0.01),
+    17px 17px 0 rgba(169, 169, 169, 0.0),
+    18px 18px 0 rgba(169, 169, 169, 0.0),
+    19px 19px 0 rgba(169, 169, 169, 0.0),
+    20px 20px 0 rgba(169, 169, 169, 0.0),
+    -15px 20px 10px rgba(169, 169, 169, 0.05);
+  }
+  
+  
+  /* END LOGIN TITLE */
+  
+  /* BOX */
+  
+  .login-box {
+    /* -webkit-filter: blur(5px); */
+    background-image: url("../../assets/sofrecom_logo.jpg");
+    background-size:15% !important;
+    background-repeat: no-repeat;
+    border-radius: 10px;
+    padding: 30px;
+    margin-top: 75px;
+    text-align: center;
+    background-size: cover;
+    box-shadow:0px 0px 10px 10px #25af43a2,
+     70px 70px 200px 10px rgba(255,255,255,.5) ,
+     40px 40px 50px 10px rgba(0,0,0,.1);
+  }
+  
+  .login-form {
+    margin-top: 25px;
+    text-align: center;
+  }
+  
+  input[type="text"] {
+    
+    border: none;
+    border-bottom: 2px solid #25af43a2;
+    border-bottom-left-radius: 100px;
+    outline: 0;
+    margin-bottom: 20px;
+    padding-left: 30px;
+    color: black;
+  }
+  
+  input[type="password"] {
+    border: none;
+    border-bottom: 2px solid #25af43a2;
+    border-bottom-left-radius: 100px;
+    outline: 0;
+    padding-left: 30px;
+    margin-bottom: 20px;
+    color: black;
+  }
+  
+  .form-group {
+    margin-bottom: 40px;
+    outline: 0px;
+    animation: animated-text 2s steps(309,end) 0.1s 1 normal both;
+  }
+  
+  .form-control:focus {
+    border-color: inherit;
+    -webkit-box-shadow: none;
+    box-shadow:inset 2px 2px 2px 0px rgba(255,255,255,.5),
+     7px 7px 20px 0px rgba(0,0,0,.1),
+     4px 4px 5px 0px rgba(0,0,0,.1);
+    border-bottom: 2px solid #244578;
+    outline: 0;
+  }
+  .form-control-label {
+    font-size: 13px;
+    color: #244578;
+    font-weight: 200;
+    letter-spacing: 1px;
+    border-bottom:2px solid #244578;
+  }
+  
+  /* ORANGE LINE ANIMATION */
+  
+  @keyframes animated-text{
+    from{width: 0;}
+    to{width: 100%;}
+  }
+  
+  
+  
+  
+  
+  /* BUTTON */
+  
+  .custom-btn {
+    width: 130px;
+    height: 40px;
+    border-radius: 5px;
+    margin: 10%;
+    font-weight: 200;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
+     box-shadow:inset 2px 2px 2px 0px rgba(255,255,255,.5),
+     7px 7px 20px 0px rgba(0, 0, 0, 0.1),
+     4px 4px 5px 0px rgba(0,0,0,.1);
+    outline: none;
+    left: 11vw;
+  }
+  .btn-16 {
+    border: none;
+    color: #244578;
+  }
+  .btn-16:after {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 100%;
+    top: 0;
+    left: 0;
+    direction: rtl;
+    z-index: -1;
+    box-shadow:
+     -7px -7px 20px 0px #fff9,
+     -4px -4px 5px 0px #fff9,
+     7px 7px 20px 0px #0002,
+     4px 4px 5px 0px #0001;
+    transition: all 0.3s ease;
+  }
+  .btn-16:hover {
+    color: #f39801;
+  }
+  .btn-16:hover:after {
+    left: auto;
+    right: 0;
+    width: 100%;
+  }
+  .btn-16:active {
+    top: 5px;
+  }
+   
+    /* END BOX */

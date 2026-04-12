@@ -1,0 +1,83 @@
+<div class="container mt-4">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-primary">Gestion des Tragets</h2>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="card shadow-sm p-3 mb-3 border-0">
+    <input type="text"
+           [(ngModel)]="searchText"
+           (input)="search()"
+           placeholder="🔍 Rechercher un trage..."
+           class="form-control form-control-lg"/>
+  </div>
+
+  <!-- FORM -->
+  <div class="card shadow-sm p-4 mb-4 border-0">
+
+    <h5 class="mb-3">{{ isEdit ? 'Modifier Traget' : 'Ajouter Traget' }}</h5>
+
+    <input type="text"
+           [(ngModel)]="traget.libelle"
+           placeholder="Libellé du trage"
+           class="form-control mb-3"/>
+
+    <div class="d-flex gap-2">
+
+      <button class="btn btn-success px-4"
+              (click)="save()">
+        💾 {{ isEdit ? 'Modifier' : 'Ajouter' }}
+      </button>
+
+      <button class="btn btn-outline-secondary"
+              (click)="reset()">
+        ↩ Annuler
+      </button>
+
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card shadow-sm border-0">
+
+    <div class="card-body p-0">
+
+      <table class="table table-hover align-middle mb-0">
+
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Libellé</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let t of filteredTragets">
+            <td>{{ t.id }}</td>
+            <td class="fw-semibold">{{ t.libelle }}</td>
+
+            <td class="text-center">
+
+              <button class="btn btn-sm btn-outline-warning me-2"
+                      (click)="edit(t)">
+                ✏ Edit
+              </button>
+
+            <button class="btn btn-danger btn-sm"
+        (click)="confirmDelete(t.id!)">
+  Delete
+</button>
+
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+  </div>
+</div>
+<p-confirmDialog></p-confirmDialog>

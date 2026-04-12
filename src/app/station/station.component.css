@@ -1,0 +1,95 @@
+/* Bloc .table-responsive supprimé */
+.table {
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+.table thead th {
+  position: sticky;
+  top: 0;
+  background: #f7f7f9;
+  color: #23272f;
+  font-weight: 600;
+  border-bottom: 2px solid #e0e0e0;
+}
+.table-hover tbody tr:hover {
+  background: #f0f4fa;
+  transition: background 0.2s;
+}
+.table td, .table th {
+  vertical-align: middle;
+  padding: 0.75rem 1rem;
+}
+.table-dark {
+  background: #f7f7f9 !important;
+  color: #23272f !important;
+}
+.btn {
+  border-radius: 28px !important;
+  font-weight: 500;
+  padding: 7px 22px;
+  font-size: 1rem;
+  margin-right: 0.3rem;
+}
+.btn-danger {
+  background: linear-gradient(90deg, #db504a 0%, #fd7238 100%) !important;
+  border: none !important;
+  color: #fff !important;
+}
+.btn-primary {
+  background: linear-gradient(90deg, #3C91E6 0%, #21d4fd 100%) !important;
+  border: none !important;
+  color: #fff !important;
+}
+.btn-success {
+  background: linear-gradient(90deg, #21d4fd 0%, #3C91E6 100%) !important;
+  border: none !important;
+  color: #fff !important;
+}
+.btn:active, .btn:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px #cfe8ff44 !important;
+}
+/* Modern modal style for station */
+.modern-modal {
+  background: #fff !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px rgba(44,62,80,0.13);
+  border: none !important;
+  padding: 1.4rem 1rem;
+  animation: modalIn 0.35s cubic-bezier(.4,0,.2,1);
+  /* overflow: visible !important; */
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* PrimeNG station dialog customizations */
+.station-dialog .p-dialog-content {
+  padding: 1rem 1rem 1.2rem 1rem;
+}
+.station-dialog .p-dialog-titlebar {
+  border-bottom: none;
+  padding: 0.8rem 1rem;
+}
+.station-dialog .p-dialog .p-button {
+  border-radius: 12px;
+}
+
+/* Smaller action buttons spacing */
+.p-button-sm {
+  padding: 0.35rem 0.6rem;
+}
+
+.p-button-rounded.p-button-sm {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.p-inputgroup .p-inputtext {
+  height: 36px;
+}

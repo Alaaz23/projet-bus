@@ -1,0 +1,36 @@
+<div id="map"></div>
+
+<form (ngSubmit)="onSearch()" class="custom-search-container">
+  <input type="text" [(ngModel)]="searchQuery" name="searchQuery" placeholder="Search" (input)="onInputChange()" autocomplete="off" class="custom-search-input">
+  <button type="submit" class="custom-search-button">Search</button>
+</form>
+
+<select id="target" name="target" [(ngModel)]="traget" (change)="onSelectTraget()">
+  <option value="" selected>Sélectionnez un trajet</option>
+  <option *ngFor="let trajet of tragetsList" [value]="trajet.id">{{ trajet.libelle }}</option>
+</select>
+
+
+<ul [ngClass]="{ 'suggestions': true, 'show': showSuggestions }" class="suggestions">
+  <li *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)">{{ suggestion }}</li>
+</ul>
+
+<button class="save-button" (click)="onSave()">
+  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='23' height='23' fill='white' class='bi bi-plus-lg' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2'/%3E%3C/svg%3E" alt="Plus icon">
+  Save
+</button>
+
+<button class="reset-button" (click)="resetMarkers()">
+  <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+  </svg>
+  Reset
+</button>
+
+<button class="undo-button" (click)="removeLastMarkerAndRoute()">
+  <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
+    <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
+  </svg>
+  Undo
+</button>
