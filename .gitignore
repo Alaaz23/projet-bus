@@ -1,0 +1,16 @@
+# Frontend Angular
+front/node_modules/
+front/dist/
+front/.angular/
+
+# Backend Spring Boot
+back/target/
+back/*.jar
+
+# Mobile Flutter
+mobile/build/
+mobile/.dart_tool/
+mobile/.gradle/
+
+# Logs
+*.log

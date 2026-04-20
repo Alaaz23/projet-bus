@@ -1,0 +1,84 @@
+<section class="dashboard-page">
+  <div class="hero">
+    <div>
+      <h1>Dashboard Transport</h1>
+      <p>Vue globale du parc bus, des trajets et des salariés.</p>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <article>
+      <h3 #salariesCountRef>0</h3>
+      <p>Salariés</p>
+    </article>
+    <article>
+      <h3 #busCountRef>0</h3>
+      <p>Bus</p>
+    </article>
+    <article>
+      <h3 #tragetsCountRef>0</h3>
+      <p>Trajets</p>
+    </article>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="panel" *ngIf="auth.isAdmin()">
+      <h2>Salariés récents</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Nom complet</th>
+            <th>Bus</th>
+            <th>Station</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let salarie of salaries | slice:0:8">
+            <td>{{ salarie.matricule }}</td>
+            <td>{{ salarie.nom }} {{ salarie.prenom }}</td>
+            <td>{{ salarie.bus?.designation }}</td>
+            <td>{{ salarie.station?.libelle }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel" *ngIf="!auth.isAdmin()">
+      <h2>Mon Profil</h2>
+      <ng-container *ngIf="ownSalarie as s; else noProfile">
+        <table class="profile-table">
+          <tbody>
+            <tr><th>Matricule</th><td>{{ s.matricule }}</td></tr>
+            <tr><th>Nom complet</th><td>{{ s.nom }} {{ s.prenom }}</td></tr>
+            <tr><th>Bus assigné</th><td>{{ s.bus?.designation || 'Non assigné' }}</td></tr>
+            <tr><th>Station</th><td>{{ s.station?.libelle || 'Non assignée' }}</td></tr>
+          </tbody>
+        </table>
+      </ng-container>
+      <ng-template #noProfile>
+        <p style="color:#617482;padding:1rem 0;">Profil introuvable. Vérifiez votre connexion.</p>
+      </ng-template>
+    </div>
+
+    <div class="panel">
+      <h2>Bus disponibles</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Désignation</th>
+            <th>Trajet</th>
+            <th>Capacité</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let bus of Buses | slice:0:8">
+            <td>{{ bus.designation }}</td>
+            <td>{{ bus.tragetLabel || 'N/A' }}</td>
+            <td>{{ bus.capacite }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

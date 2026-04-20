@@ -1,0 +1,118 @@
+<section class="salary-page">
+  <div class="toolbar">
+    <div>
+      <h1>{{ auth.isAdmin() ? 'Gestion des Salariés' : 'Mes Informations' }}</h1>
+      <p>{{ auth.isAdmin() ? 'Recherche, édition et suppression des salariés.' : 'Consultez et modifiez vos informations personnelles.' }}</p>
+    </div>
+
+    <button *ngIf="auth.canCreate()" (click)="openCreate()">+ Ajouter</button>
+  </div>
+
+  <div class="alerts" *ngIf="error || success">
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <p class="success" *ngIf="success">{{ success }}</p>
+  </div>
+
+  <div class="layout-grid">
+    <div class="list-card">
+      <div class="search-row" *ngIf="auth.isAdmin()">
+        <input type="text" [(ngModel)]="searchText" placeholder="Rechercher un salarié" />
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Bus</th>
+            <th>Station</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let salarie of filteredSalaries">
+            <td>{{ salarie.matricule }}</td>
+            <td>{{ salarie.nom }}</td>
+            <td>{{ salarie.prenom }}</td>
+            <td>{{ salarie.bus?.designation || salarie.bus?.id }}</td>
+            <td>{{ salarie.station?.libelle || salarie.station?.id }}</td>
+            <td class="actions">
+              <button *ngIf="auth.isAdmin() && auth.canEditSalarie(salarie.matricule)" class="light" (click)="openEdit(salarie)">Modifier</button>
+              <button *ngIf="!auth.isAdmin() && auth.canEditSalarie(salarie.matricule)" class="light" (click)="openPwModal(salarie)">Changer le mot de passe</button>
+              <ng-container *ngIf="auth.canDelete()">
+                <button class="danger" *ngIf="pendingDeleteId !== salarie.id" (click)="requestDelete(salarie.id)">Supprimer</button>
+                <div class="inline-confirm" *ngIf="pendingDeleteId === salarie.id">
+                  <button class="danger" (click)="confirmDelete(salarie)">Confirmer</button>
+                  <button class="light" (click)="cancelDelete()">Annuler</button>
+                </div>
+              </ng-container>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <aside class="editor" [class.open]="editorOpen" [attr.aria-hidden]="!editorOpen">
+      <div class="editor-head">
+        <h2>{{ isEdit ? 'Modifier salarie' : 'Ajouter salarie' }}</h2>
+        <button class="light" (click)="closeEditor()">Fermer</button>
+      </div>
+
+      <form (ngSubmit)="save()" *ngIf="editorOpen">
+        <label>Matricule</label>
+        <input [(ngModel)]="formModel.matricule" name="matricule" type="text" [readonly]="isEdit" required />
+
+        <label>Nom</label>
+        <input [(ngModel)]="formModel.nom" name="nom" type="text" required />
+
+        <label>Prenom</label>
+        <input [(ngModel)]="formModel.prenom" name="prenom" type="text" required />
+
+        <ng-container *ngIf="auth.isAdmin() && !isEdit">
+          <label>Mot de passe</label>
+          <input [(ngModel)]="formModel.password" name="password" type="password" required />
+          <small style="color:#617482;font-size:0.78rem;">
+            Le salarié utilisera ce mot de passe + son matricule pour se connecter.
+          </small>
+        </ng-container>
+
+        <label>Bus</label>
+        <select [(ngModel)]="formModel.bus.id" name="bus" required>
+          <option value="">Selectionner un bus</option>
+          <option *ngFor="let bus of buses" [value]="bus.id">{{ bus.designation }}</option>
+        </select>
+
+        <label>Station</label>
+        <select [(ngModel)]="formModel.station.id" name="station" required>
+          <option value="">Selectionner une station</option>
+          <option *ngFor="let station of stations" [value]="station.id">{{ station.libelle }}</option>
+        </select>
+
+        <button type="submit">{{ isEdit ? 'Enregistrer' : 'Ajouter' }}</button>
+      </form>
+    </aside>
+  </div>
+
+  <div class="editor-backdrop" *ngIf="editorOpen" (click)="closeEditor()"></div>
+
+  <!-- Modal : modifier le mot de passe (USER) -->
+  <div class="editor" [class.open]="pwModalOpen" [attr.aria-hidden]="!pwModalOpen">
+    <div class="editor-head">
+      <h2>Modifier le mot de passe</h2>
+      <button class="light" (click)="pwModalOpen = false">Fermer</button>
+    </div>
+    <div class="alerts" *ngIf="pwError || pwSuc">
+      <p class="error" *ngIf="pwError">{{ pwError }}</p>
+      <p class="success" *ngIf="pwSuc">{{ pwSuc }}</p>
+    </div>
+    <form (ngSubmit)="savePw()" *ngIf="pwModalOpen">
+      <label>Nouveau mot de passe</label>
+      <input [(ngModel)]="newPw" name="newPw" type="password" required placeholder="Minimum 4 caractères" />
+      <label>Confirmer le mot de passe</label>
+      <input [(ngModel)]="confirmPw" name="confirmPw" type="password" required placeholder="Répéter le mot de passe" />
+      <button type="submit">Enregistrer</button>
+    </form>
+  </div>
+  <div class="editor-backdrop" *ngIf="pwModalOpen" (click)="pwModalOpen = false"></div>
+</section>

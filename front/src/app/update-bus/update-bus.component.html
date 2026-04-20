@@ -1,0 +1,33 @@
+<section class="bus-page">
+  <div class="header-row">
+    <div>
+      <h1>Modifier un bus</h1>
+      <p>Edition dans une zone stable et visible, comme Stations.</p>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <form (ngSubmit)="onUpdate()" method="post">
+      <label for="busSelect">Bus</label>
+      <select id="busSelect" [(ngModel)]="selectedBusId" name="busSelect" (change)="onSelectBus()" required>
+        <option value="" disabled>Selectionner un bus</option>
+        <option *ngFor="let bus of busList" [value]="bus.id">{{ bus.designation }} ({{ bus.id }})</option>
+      </select>
+
+      <label for="designation">Designation</label>
+      <input type="text" id="designation" [(ngModel)]="designation" name="designation" required />
+
+      <label for="capacity">Capacite</label>
+      <input type="number" id="capacity" [(ngModel)]="capacity" name="capacity" required min="1" />
+
+      <label for="tragetSelect">Trajet</label>
+      <select id="tragetSelect" [(ngModel)]="selectedTraget" name="tragetSelect" required>
+        <option value="" disabled>Selectionner un trajet</option>
+        <option *ngFor="let traget of tragetList" [value]="traget.id">{{ traget.libelle }}</option>
+      </select>
+
+      <button type="submit">Enregistrer les modifications</button>
+    </form>
+  </div>
+</section>
+
