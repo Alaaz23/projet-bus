@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import { CountUp } from 'countup.js';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -23,27 +24,18 @@ export class HomeComponent implements OnInit, AfterViewInit {
   private busCountUp?: CountUp;
   private tragetsCountUp?: CountUp;
 
-  status = false;
+  constructor(private httpClient: HttpClient, public auth: AuthService) {}
 
-  addToggle() {
-    this.status = !this.status;
+  get ownSalarie(): any {
+    if (this.auth.isAdmin()) return null;
+    const username = (this.auth.currentUser?.username || '').toLowerCase();
+    return this.salaries.find((s: any) =>
+      (s.matricule || '').toLowerCase() === username
+    ) || null;
   }
-
-  teamMenuExpanded: boolean = false;
-  tablesMenuExpanded = false;
-
-  // Index signature to address TypeScript error
-  [key: string]: any;
-
-  // Function to toggle expanded state
-  toggleMenu(menu: string): void {
-    this[menu] = !this[menu];
-  }
-
-  constructor(private httpClient: HttpClient) {}
 
   ngOnInit(): void {
-    console.log('Start of ngOnInit');
+    // no-op
   }
 
   ngAfterViewInit(): void {
@@ -71,7 +63,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
       }
     );
   
-    console.log('End of ngAfterViewInit');
   }
   
   getCounts() {

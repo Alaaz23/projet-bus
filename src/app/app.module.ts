@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -17,7 +17,6 @@ import { MapComponent } from './map/map.component';
 import { RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CountUpModule } from 'ngx-countup';
-import { routes } from './app.routes';
 import { CommonModule } from '@angular/common';
 
 import { LayoutComponent } from './layout/layout.component';
@@ -26,6 +25,10 @@ import { StationComponent } from './station/station.component';
 import { TragetComponent } from './traget/traget.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { SalarieManagementComponent } from './salarie-management/salarie-management.component';
+import { AuthTokenInterceptor } from './core/auth.interceptor';
+import { BusManagementComponent } from './bus-management/bus-management.component';
+import { FeedbackManagementComponent } from './feedback-management/feedback-management.component';
 
 
 @NgModule({
@@ -40,11 +43,15 @@ import { ConfirmationService } from 'primeng/api';
         MapComponent,
         HomeComponent,
         LayoutComponent,
-        TragetComponent
-              
-
+        TragetComponent,
+        SalarieManagementComponent,
+        BusManagementComponent,
+        FeedbackManagementComponent
     ],
-    providers: [ConfirmationService],
+    providers: [
+        ConfirmationService,
+        { provide: HTTP_INTERCEPTORS, useClass: AuthTokenInterceptor, multi: true }
+    ],
     bootstrap: [AppComponent],
     imports: [
         BrowserModule,

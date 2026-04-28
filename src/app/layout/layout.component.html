@@ -1,132 +1,39 @@
-<section id="sidebar" [class.hide]="status">
+<div class="app-shell" [class.collapsed]="isSidebarCollapsed">
+  <aside class="sidebar">
     <a routerLink="/home" class="brand">
-      <img src="assets/ss.png" alt="logo" height="40" width="45" style="margin-right: 17px;margin-left: 5px;"/>
-      <span class="text">Sofrecom</span>
+      <img src="assets/ss.png" alt="logo" />
+      <span>Bus Tracking</span>
     </a>
-    <ul class="side-menu top">
-      <li class="active">
-        <a routerLink="/home" routerLinkActive="active">
-          <i class='bx bxs-dashboard' ></i>
-          <span class="text">Dashboard</span>
-        </a>
-      </li>
-       <li class="active">
-      <a routerLink="/stations" routerLinkActive="active">
-        <i class='bx bxs-dashboard' ></i>
-        <span class="text">stations</span>
-      </a>
-    </li>
-      <li class="active">
-      <a routerLink="/tragets" routerLinkActive="active">
-        <i class='bx bxs-dashboard' ></i>
-        <span class="text">Tragets</span>
-      </a>
-    </li>
-      <li class="dropdown" [class.expanded]="teamMenuExpanded" (click)="toggleMenu('teamMenuExpanded')">
-        <a routerLink="/add-salarie" routerLinkActive="active"data-toggle="collapse">
-          <i class='bx bxs-group'></i>
-          <span class="text">Salariés</span>
-        </a>
-        <ul class="collapse" id="teamSubmenu">
-          <li><a routerLink="/add-salarie" >Ajouter</a></li>
-          <li><a routerLink="/update-salarie" >Modifier</a></li>
-          <li><a routerLink="/delete-salarie" >Supprimer</a></li>
-        </ul>
-      </li>
-  
-      <li class="dropdown" [class.expanded]="tablesMenuExpanded" (click)="toggleMenu('tablesMenuExpanded | json')">
-        <a href="#tablesSubmenu" data-toggle="collapse">
-          <i class='bx bxs-bus'></i>
-          <span class="text">Bus</span>
-        </a>
-        <ul class="collapse" id="tablesSubmenu">
-          <li><a routerLink="/add-bus" >Ajouter</a></li>
-          <li><a routerLink="/update-bus" >Modifier</a></li>
-          <li><a routerLink="/delete-bus" >Supprimer</a></li>
-        </ul>
-      </li>
-      <li class="dropdown" [class.expanded]="tablesMenuExpanded" (click)="toggleMenu('tablesMenuExpanded | json')">
-        <a href="#tablesSubmenu" data-toggle="collapse">
-          <i class='bx bx-map'></i>
-          <span class="text">Stations</span>
-        </a>
-        <ul class="collapse" id="tablesSubmenu">
-          <li><a href="#">Ajouter</a></li>
-          <li><a href="#">Modifier</a></li>
-          <li><a href="#">Supprimer</a></li>
-        </ul>
-      </li>
-      <li class="dropdown" [class.expanded]="tablesMenuExpanded" (click)="toggleMenu('tablesMenuExpanded | json')">
-        <a href="#tablesSubmenu" data-toggle="collapse">
-          <i class='bx bx-trip'></i>
-          <span class="text">Tragets</span>
-        </a>
-        <ul class="collapse" id="tablesSubmenu">
-          <li><a href="#">Ajouter</a></li>
-          <li><a href="#">Modifier</a></li>
-          <li><a href="#">Supprimer</a></li>
-        </ul>
-      </li>
-    
-      <li class="dropdown" [class.expanded]="tablesMenuExpanded" (click)="toggleMenu('tablesMenuExpanded | json')">
-        <a href="#tablesSubmenu" data-toggle="collapse">
-          <i class='bx bx-table'></i>
-          <span class="text">Tables</span>
-        </a>
-        <ul class="collapse" id="tablesSubmenu">
-          <li><a href="#">Salariés</a></li>
-          <li><a href="#">Bus</a></li>
-          <li><a href="#">Tragets</a></li>
-          <li><a href="#">Stations</a></li>
-        </ul>
-      </li>
-    
-    </ul>
-    <ul class="side-menu">
-      <li>
-        <a href="#">
-          <i class='bx bxs-cog' ></i>
-          <span class="text">Settings</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/login" class="logout">
-          <i class='bx bxs-log-out-circle' ></i>
-          <span class="text">Logout</span>
-        </a>
-      </li>
-    </ul>
-  </section>
-  <!-- SIDEBAR -->
-  
-  
-  
-  <!-- CONTENT -->
-  <section id="content">
-    <!-- NAVBAR -->
-    <nav>
-      <i (click)="addToggle()" class='bx bx-menu' ></i>
-      <a href="#" class="nav-link">Categories</a>
-      <form action="#">
-        <div class="form-input">
-          <input type="search" placeholder="Search...">
-          <button type="button" class="search-btn"><i class='bx bx-search' ></i></button>
-        </div>
-      </form>
-      <a href="#" class="notification">
-        <i class='bx bxs-bell' ></i>
-        <span class="num">0</span>
-      </a>
-      <a href="#" class="profile">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="37" viewBox="0 0 27 30" style="fill: #3e4b5b"><path d="M12 2A10.13 10.13 0 0 0 2 12a10 10 0 0 0 4 7.92V20h.1a9.7 9.7 0 0 0 11.8 0h.1v-.08A10 10 0 0 0 22 12 10.13 10.13 0 0 0 12 2zM8.07 18.93A3 3 0 0 1 11 16.57h2a3 3 0 0 1 2.93 2.36 7.75 7.75 0 0 1-7.86 0zm9.54-1.29A5 5 0 0 0 13 14.57h-2a5 5 0 0 0-4.61 3.07A8 8 0 0 1 4 12a8.1 8.1 0 0 1 8-8 8.1 8.1 0 0 1 8 8 8 8 0 0 1-2.39 5.64z"></path><path d="M12 6a3.91 3.91 0 0 0-4 4 3.91 3.91 0 0 0 4 4 3.91 3.91 0 0 0 4-4 3.91 3.91 0 0 0-4-4zm0 6a1.91 1.91 0 0 1-2-2 1.91 1.91 0 0 1 2-2 1.91 1.91 0 0 1 2 2 1.91 1.91 0 0 1-2 2z"></path></svg>
-          </a>
+
+    <nav class="menu">
+      <a routerLink="/home" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/salaries" routerLinkActive="active">{{ auth.isAdmin() ? 'Salariés' : 'Mon Profil' }}</a>
+      <a routerLink="/stations" routerLinkActive="active">Stations</a>
+      <a routerLink="/tragets" routerLinkActive="active">Trajets</a>
+      <a routerLink="/map" routerLinkActive="active">Carte</a>
+
+      <div class="menu-group" *ngIf="canManage()">
+        <p>Buss</p>
+        <a routerLink="/buss" routerLinkActive="active">Gestion des bus</a>
+      </div>
+
+      <a routerLink="/feedbacks" routerLinkActive="active" *ngIf="canManage()">Feedbacks</a>
     </nav>
-    <!-- NAVBAR -->
-  
-    <!-- MAIN -->
-    <main>
-        <ng-content></ng-content>
+  </aside>
+
+  <section class="content">
+    <header class="topbar">
+      <button class="menu-toggle" (click)="toggleSidebar()">☰</button>
+
+      <div class="topbar-meta">
+        <span class="role">Role: {{ roleLabel }}</span>
+        <strong>{{ auth.currentUser?.displayName }}</strong>
+        <button class="logout" (click)="logout()">Logout</button>
+      </div>
+    </header>
+
+    <main class="page-body">
+      <router-outlet></router-outlet>
     </main>
-    <!-- MAIN -->
   </section>
-  <!-- CONTENT -->
+</div>

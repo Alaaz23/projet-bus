@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { AuthService } from '../core/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-layout',
@@ -6,20 +8,24 @@ import { Component } from '@angular/core';
   styleUrl: './layout.component.css'
 })
 export class LayoutComponent {
-  status = false;
+  isSidebarCollapsed = false;
 
-  addToggle() {
-    this.status = !this.status;
+  constructor(public auth: AuthService, private router: Router) {}
+
+  toggleSidebar(): void {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
 
-  teamMenuExpanded: boolean = false;
-  tablesMenuExpanded = false;
+  logout(): void {
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
 
-  // Index signature to address TypeScript error
-  [key: string]: any;
+  get roleLabel(): string {
+    return this.auth.currentUser?.role === 'ADMIN' ? 'Admin' : 'User';
+  }
 
-  // Function to toggle expanded state
-  toggleMenu(menu: string): void {
-    this[menu] = !this[menu];
+  canManage(): boolean {
+    return this.auth.isAdmin();
   }
 }

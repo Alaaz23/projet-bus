@@ -11,22 +11,37 @@ import { LoginComponent } from './login/login.component';
 import { MapComponent } from './map/map.component';
 import { StationComponent } from './station/station.component';
 import { TragetComponent } from './traget/traget.component';
+import { LayoutComponent } from './layout/layout.component';
+import { SalarieManagementComponent } from './salarie-management/salarie-management.component';
+import { BusManagementComponent } from './bus-management/bus-management.component';
+import { FeedbackManagementComponent } from './feedback-management/feedback-management.component';
+import { authGuard } from './core/auth.guard';
+import { roleGuard } from './core/role.guard';
 
 const routes: Routes = [
-  { path: '',redirectTo:'home',pathMatch: 'full'},
-  { path: 'home', component: HomeComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'add-salarie', component: AddSalarieComponent },
-  { path: 'update-salarie', component: UpdateSalarieComponent },
-  { path: 'delete-salarie', component: DeleteSalariesComponent },
-  { path: 'update-bus', component: UpdateBusComponent },
-  { path: 'delete-bus', component: DeleteBusComponent },
-  { path: 'add-bus', component: AddBusComponent },
-  { path: 'stations', component: StationComponent },
-  {path: 'tragets', component: TragetComponent},
-
-  { path: 'map', component: MapComponent },
-
+  {
+    path: '',
+    component: LayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: HomeComponent },
+      { path: 'salaries', component: SalarieManagementComponent },
+      { path: 'buss', component: BusManagementComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'stations', component: StationComponent },
+      { path: 'tragets', component: TragetComponent },
+      { path: 'map', component: MapComponent },
+      { path: 'add-bus', component: AddBusComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'update-bus', component: UpdateBusComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'delete-bus', component: DeleteBusComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'add-salarie', component: AddSalarieComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'update-salarie', component: UpdateSalarieComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'delete-salarie', component: DeleteSalariesComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'feedbacks', component: FeedbackManagementComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } }
+    ]
+  },
+  { path: '**', redirectTo: 'home' }
 ];
 
 @NgModule({

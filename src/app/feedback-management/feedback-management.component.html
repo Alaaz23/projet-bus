@@ -1,0 +1,52 @@
+<section class="feedback-page">
+  <div class="page-header">
+    <h1>Gestion des Feedbacks</h1>
+    <span class="badge-pending" *ngIf="pendingCount > 0">{{ pendingCount }} en attente</span>
+  </div>
+
+  <div class="filter-bar">
+    <button [class.active]="filter === 'all'" (click)="filter = 'all'">Tous</button>
+    <button [class.active]="filter === 'pending'" (click)="filter = 'pending'">Non traités</button>
+    <button [class.active]="filter === 'checked'" (click)="filter = 'checked'">Traités</button>
+    <button class="btn-refresh" (click)="loadFeedbacks()">↻ Actualiser</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <p>Chargement des feedbacks...</p>
+  </div>
+
+  <div *ngIf="!isLoading && filteredFeedbacks.length === 0" class="empty-state">
+    <p>Aucun feedback trouvé.</p>
+  </div>
+
+  <div class="feedback-grid" *ngIf="!isLoading">
+    <div
+      class="feedback-card"
+      *ngFor="let fb of filteredFeedbacks"
+      [class.checked]="fb.checked"
+    >
+      <div class="card-header">
+        <div class="salarie-info">
+          <span class="salarie-name">{{ fb.salarie.nom }} {{ fb.salarie.prenom }}</span>
+          <span class="salarie-matricule">{{ fb.salarie.matricule }}</span>
+        </div>
+        <span class="status-badge" [class.badge-ok]="fb.checked" [class.badge-wait]="!fb.checked">
+          {{ fb.checked ? '✔ Traité' : '⏳ En attente' }}
+        </span>
+      </div>
+
+      <p class="feedback-description">{{ fb.description }}</p>
+
+      <div class="card-footer">
+        <span class="feedback-date">{{ fb.time | date:'dd/MM/yyyy HH:mm' }}</span>
+        <button
+          class="btn-validate"
+          *ngIf="!fb.checked"
+          (click)="markAsChecked(fb)"
+        >
+          Valider
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
