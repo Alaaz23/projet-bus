@@ -34,8 +34,14 @@
                 [class.a-larret]="bus.statut === 'A_LARRET'"
                 [class.hors-service]="bus.statut === 'HORS_SERVICE' || !bus.statut">
                 {{ bus.statut === 'EN_ROUTE' ? '🟢 En route' : bus.statut === 'A_LARRET' ? '🟡 À l\'arrêt' : '🔴 Hors service' }}
-              </span>
-            </td>
+              </span>              <select *ngIf="auth.isAdmin() && bus.id"
+                class="statut-select"
+                [value]="bus.statut || 'EN_ROUTE'"
+                (change)="changeStatut(bus, $any($event.target).value)">
+                <option value="EN_ROUTE">🟢 En route</option>
+                <option value="A_LARRET">🟡 \u00c0 l'arr\u00eat</option>
+                <option value="HORS_SERVICE">🔴 Hors service</option>
+              </select>            </td>
             <td class="actions">
               <button class="light" *ngIf="auth.isAdmin()" (click)="openEditForm(bus)">Modifier</button>
               <ng-container *ngIf="auth.canDelete() && bus.id">

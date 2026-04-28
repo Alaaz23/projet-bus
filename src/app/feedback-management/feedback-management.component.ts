@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../environments/environment';
 
 interface Feedback {
   id: number;
@@ -25,7 +26,7 @@ export class FeedbackManagementComponent implements OnInit {
   isLoading = true;
   filter: 'all' | 'pending' | 'checked' = 'all';
 
-  private readonly apiUrl = 'http://localhost:8081/Bus-tracking/feedbacks';
+  private readonly apiUrl = `${environment.apiUrl}/feedbacks`;
 
   constructor(private http: HttpClient, private toastr: ToastrService) {}
 

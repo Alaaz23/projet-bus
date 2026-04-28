@@ -1,16 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { AuthUser, UserRole } from './auth.types';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly storageKey = 'busTracking.auth';
-  private readonly apiUrl = 'http://localhost:8081/Bus-tracking/auth';
-  private readonly demoUsers: Array<{ username: string; password: string; role: UserRole; displayName: string }> = [
-    { username: 'admin', password: 'admin123', role: 'ADMIN', displayName: 'Administrator' },
-    { username: 'user', password: 'user123', role: 'USER', displayName: 'Standard User' }
-  ];
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   readonly currentUser$ = new BehaviorSubject<AuthUser | null>(this.readStoredUser());
 
@@ -42,28 +39,7 @@ export class AuthService {
             observer.complete();
           },
           error: (err) => {
-            // Fallback to demo mode if backend fails
-            const demoUser = this.demoUsers.find(
-              (u) => u.username.toLowerCase() === username.trim().toLowerCase() && u.password === password
-            );
-
-
-             if (demoUser) {
-               const roleAndUser = `${demoUser.role}:${demoUser.username}`;
-               const encodedToken = btoa(roleAndUser);
-               const authUser: AuthUser = {
-                 username: demoUser.username,
-                 role: demoUser.role,
-                 displayName: demoUser.displayName,
-                 token: `Bearer role-${encodedToken}`
-               };
-              localStorage.setItem(this.storageKey, JSON.stringify(authUser));
-              this.currentUser$.next(authUser);
-              observer.next({ success: true, message: 'Logged in (demo mode)' });
-            } else {
-              observer.next({ success: false, message: 'Identifiants invalides.' });
-            }
-
+            observer.next({ success: false, message: 'Connexion impossible au serveur. Vérifiez que le backend est démarré.' });
             observer.complete();
           }
         });

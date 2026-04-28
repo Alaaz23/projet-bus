@@ -88,10 +88,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.Buses = this.Buses.map((bus) => {
       const target = this.Targets.find((t) => t.id === bus.traget?.id);
       bus.tragetLabel = target ? target.libelle : 'N/A';
-      const totalCapacityForBus = this.salaries
-        .filter((salarie) => salarie.bus?.id === bus.id)
-        .reduce((total, salarie) => total + salarie.bus.capacite, 0);
-      bus.percentage = totalCapacityForBus > 0 ? (totalCapacityForBus / bus.capacite) * 100 : 0;
+      const assignedCount = this.salaries
+        .filter((salarie) => salarie.bus?.id === bus.id).length;
+      bus.percentage = bus.capacite > 0 ? Math.min((assignedCount / bus.capacite) * 100, 100) : 0;
       return bus;
     });
   }

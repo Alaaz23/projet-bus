@@ -155,4 +155,14 @@ export class BusManagementComponent implements OnInit {
       }
     });
   }
+
+  changeStatut(bus: BusItem, statut: string): void {
+    if (!bus.id) return;
+    this.http.put(`${this.busesApi}/${bus.id}/statut`, { statut }).subscribe({
+      next: () => {
+        bus.statut = statut;
+        this.applyFilter();
+      }
+    });
+  }
 }

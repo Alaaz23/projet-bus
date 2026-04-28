@@ -55,15 +55,11 @@ export class MapComponent implements OnInit {
 
     this.map.on('click', (event) => {
       const latlng = event.latlng;
-      console.log('Latitude:', latlng.lat);
-      console.log('Longitude:', latlng.lng);
       this.addBusStopMarker(latlng);
       if (this.libelle !== null) {
       this.markers.push(L.marker(latlng).addTo(this.map!));
-      console.log(this.libelle)
       }
       this.drawRoute();
-      console.log(this.markers);
     });
   }
 
