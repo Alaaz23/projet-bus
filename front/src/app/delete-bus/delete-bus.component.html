@@ -1,0 +1,23 @@
+<section class="bus-page">
+  <div class="header-row">
+    <div>
+      <h1>Supprimer un bus</h1>
+      <p>Suppression dans une zone visible et controllee.</p>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <form (ngSubmit)="onDelete()" method="post">
+      <label for="id">Bus</label>
+      <select id="id" [(ngModel)]="id" name="id" required>
+        <option value="" disabled>Selectionner un bus</option>
+        <option *ngFor="let bus of busList" [value]="bus.id">{{ bus.designation }} ({{ bus.id }})</option>
+      </select>
+
+      <p class="warning">Cette action est irreversible.</p>
+
+      <button type="submit">Supprimer le bus</button>
+    </form>
+  </div>
+</section>
+
