@@ -4,11 +4,11 @@
     <p>Connectez-vous pour acceder au dashboard.</p>
 
     <form (ngSubmit)="submit()">
-      <label for="username">Username</label>
-      <input id="username" [(ngModel)]="username" name="username" type="text" required />
+      <label for="username">Matricule</label>
+      <input id="username" [(ngModel)]="username" name="username" type="text" placeholder="Entrez votre matricule" required />
 
-      <label for="password">Password</label>
-      <input id="password" [(ngModel)]="password" name="password" type="password" required />
+      <label for="password">Mot de passe</label>
+      <input id="password" [(ngModel)]="password" name="password" type="password" placeholder="Entrez votre mot de passe" required />
 
       <button type="submit">Se connecter</button>
 
