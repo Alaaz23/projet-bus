@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../core/auth.service';
+import { environment } from '../../environments/environment';
 
 interface SalariePayload {
   id?: number;
@@ -45,9 +46,10 @@ export class SalarieManagementComponent implements OnInit {
   }
 
   loadAll(): void {
-    this.http.get<any[]>('http://localhost:8081/Bus-tracking/salaries/all').subscribe((res) => (this.salaries = res || []));
-    this.http.get<any[]>('http://localhost:8081/Bus-tracking/buses/getAll').subscribe((res) => (this.buses = res || []));
-    this.http.get<any[]>('http://localhost:8081/Bus-tracking/stations/all').subscribe((res) => (this.stations = res || []));
+    const api = environment.apiUrl;
+    this.http.get<any[]>(`${api}/salaries/all`).subscribe((res) => (this.salaries = res || []));
+    this.http.get<any[]>(`${api}/buses/getAll`).subscribe((res) => (this.buses = res || []));
+    this.http.get<any[]>(`${api}/stations/all`).subscribe((res) => (this.stations = res || []));
   }
 
   get filteredSalaries(): any[] {
@@ -142,7 +144,7 @@ export class SalarieManagementComponent implements OnInit {
 
     if (this.isEdit && this.formModel.id) {
       this.http
-        .put(`http://localhost:8081/Bus-tracking/salaries/update/${this.formModel.id}`, payload)
+        .put(`${environment.apiUrl}/salaries/update/${this.formModel.id}`, payload)
         .subscribe({
           next: () => {
             this.success = 'Salarié modifié avec succès.';
@@ -154,7 +156,7 @@ export class SalarieManagementComponent implements OnInit {
       return;
     }
 
-    this.http.post('http://localhost:8081/Bus-tracking/salaries/add', { ...payload, password: this.formModel.password }).subscribe({
+    this.http.post(`${environment.apiUrl}/salaries/add`, { ...payload, password: this.formModel.password }).subscribe({
       next: () => {
         this.success = 'Salarié ajouté avec succès.';
         this.editorOpen = false;
@@ -184,7 +186,7 @@ export class SalarieManagementComponent implements OnInit {
 
     this.clearMessages();
     this.http
-      .delete(`http://localhost:8081/Bus-tracking/salaries/delete/${salarie.id}`, { params: { matricule: salarie.matricule } })
+      .delete(`${environment.apiUrl}/salaries/delete/${salarie.id}`, { params: { matricule: salarie.matricule } })
       .subscribe({
         next: () => {
           this.pendingDeleteId = null;
@@ -223,7 +225,7 @@ export class SalarieManagementComponent implements OnInit {
       bus: { id: String(s.bus?.id ?? '') },
       station: { id: String(s.station?.id ?? '') }
     };
-    this.http.put(`http://localhost:8081/Bus-tracking/salaries/update/${s.id}`, payload).subscribe({
+    this.http.put(`${environment.apiUrl}/salaries/update/${s.id}`, payload).subscribe({
       next: () => {
         this.pwSuc = 'Mot de passe mis à jour avec succès.';
         this.pwError = '';

@@ -19,6 +19,7 @@
             <th>Designation</th>
             <th>Capacite</th>
             <th>Trajet</th>
+            <th>Statut</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -27,6 +28,14 @@
             <td>{{ bus.designation }}</td>
             <td>{{ bus.capacite }}</td>
             <td>{{ bus.traget?.libelle }}</td>
+            <td>
+              <span class="statut-badge"
+                [class.en-route]="bus.statut === 'EN_ROUTE'"
+                [class.a-larret]="bus.statut === 'A_LARRET'"
+                [class.hors-service]="bus.statut === 'HORS_SERVICE' || !bus.statut">
+                {{ bus.statut === 'EN_ROUTE' ? '🟢 En route' : bus.statut === 'A_LARRET' ? '🟡 À l\'arrêt' : '🔴 Hors service' }}
+              </span>
+            </td>
             <td class="actions">
               <button class="light" *ngIf="auth.isAdmin()" (click)="openEditForm(bus)">Modifier</button>
               <ng-container *ngIf="auth.canDelete() && bus.id">

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../core/auth.service';
+import { environment } from '../../environments/environment';
 
 interface TragetItem {
   id: number;
@@ -12,6 +13,7 @@ interface BusItem {
   designation: string;
   capacite: number | null;
   traget?: TragetItem;
+  statut?: string;
 }
 
 @Component({
@@ -32,8 +34,8 @@ export class BusManagementComponent implements OnInit {
   currentBus: BusItem = { designation: '', capacite: null };
   selectedTragetId = '';
 
-  private readonly busesApi = 'http://localhost:8081/Bus-tracking/buses';
-  private readonly tragetsApi = 'http://localhost:8081/Bus-tracking/tragets/getAll';
+  private readonly busesApi = `${environment.apiUrl}/buses`;
+  private readonly tragetsApi = `${environment.apiUrl}/tragets/getAll`;
 
   constructor(private http: HttpClient, public auth: AuthService) {}
 

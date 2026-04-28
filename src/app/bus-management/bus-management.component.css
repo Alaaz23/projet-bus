@@ -155,3 +155,14 @@ th {
     opacity: 1;
   }
 }
+
+.statut-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.statut-badge.en-route { background: #dcfce7; color: #16a34a; }
+.statut-badge.a-larret { background: #fef9c3; color: #ca8a04; }
+.statut-badge.hors-service { background: #fee2e2; color: #dc2626; }

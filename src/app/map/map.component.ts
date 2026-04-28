@@ -6,6 +6,7 @@ import { GeoSearchControl,OpenStreetMapProvider } from 'leaflet-geosearch';
 import { LatLngTuple, LatLngExpression, Control } from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-map',
@@ -32,10 +33,9 @@ export class MapComponent implements OnInit {
     this.getAllTragets();
   }
   getAllTragets() {
-    this.http.get<any[]>('http://localhost:8081/Bus-tracking/tragets/getAll')
+    this.http.get<any[]>(`${environment.apiUrl}/tragets/getAll`)
       .subscribe(
         response => {
-          console.log('Tragets récupérés avec succès', response);
           this.tragetsList = response;
         },
         error => {
