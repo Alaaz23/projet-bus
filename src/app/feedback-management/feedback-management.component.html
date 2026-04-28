@@ -9,6 +9,7 @@
     <button [class.active]="filter === 'pending'" (click)="filter = 'pending'">Non traités</button>
     <button [class.active]="filter === 'checked'" (click)="filter = 'checked'">Traités</button>
     <button class="btn-refresh" (click)="loadFeedbacks()">↻ Actualiser</button>
+    <button class="btn-pdf" (click)="exportPdf()"><i class="fas fa-file-pdf"></i> Exporter PDF</button>
   </div>
 
   <div *ngIf="isLoading" class="loading-state">

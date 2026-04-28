@@ -41,6 +41,18 @@ export class SalarieManagementComponent implements OnInit {
 
   constructor(private http: HttpClient, public auth: AuthService) {}
 
+  exportPdf(): void {
+    this.http.get(`${environment.apiUrl}/admin/export/salaries`, { responseType: 'blob' })
+      .subscribe(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `salaries_${new Date().toISOString().split('T')[0]}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      });
+  }
+
   ngOnInit(): void {
     this.loadAll();
   }

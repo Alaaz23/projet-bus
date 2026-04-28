@@ -18,6 +18,12 @@
       </div>
 
       <a routerLink="/feedbacks" routerLinkActive="active" *ngIf="canManage()">Feedbacks</a>
+
+      <div class="menu-group" *ngIf="canManage()">
+        <p>Analytics</p>
+        <a routerLink="/dashboard" routerLinkActive="active">📊 Dashboard Stats</a>
+        <a routerLink="/trajets-history" routerLinkActive="active">📜 Historique Trajets</a>
+      </div>
     </nav>
   </aside>
 
@@ -26,6 +32,7 @@
       <button class="menu-toggle" (click)="toggleSidebar()">☰</button>
 
       <div class="topbar-meta">
+        <app-notification-bell *ngIf="canManage()"></app-notification-bell>
         <span class="role">Role: {{ roleLabel }}</span>
         <strong>{{ auth.currentUser?.displayName }}</strong>
         <button class="logout" (click)="logout()">Logout</button>

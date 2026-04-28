@@ -51,7 +51,6 @@
 }
 
 .btn-refresh {
-  margin-left: auto;
   background: #f1f5f9 !important;
   color: #334155 !important;
   border-color: #e2e8f0 !important;
@@ -60,6 +59,14 @@
 .btn-refresh:hover {
   background: #e2e8f0 !important;
 }
+
+.btn-pdf {
+  background: #F44336 !important;
+  color: white !important;
+  border-color: #F44336 !important;
+}
+.btn-pdf:hover { background: #c62828 !important; }
+.btn-pdf i { margin-right: 6px; }
 
 .loading-state,
 .empty-state {

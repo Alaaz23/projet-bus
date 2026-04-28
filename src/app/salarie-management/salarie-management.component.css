@@ -10,6 +10,25 @@
   gap: 1rem;
 }
 
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-pdf {
+  background: #F44336;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.btn-pdf:hover { background: #c62828; }
+.btn-pdf i { margin-right: 6px; }
+
 .toolbar h1 {
   margin: 0;
   font-family: 'Sora', sans-serif;

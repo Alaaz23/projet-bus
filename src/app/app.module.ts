@@ -29,6 +29,9 @@ import { SalarieManagementComponent } from './salarie-management/salarie-managem
 import { AuthTokenInterceptor } from './core/auth.interceptor';
 import { BusManagementComponent } from './bus-management/bus-management.component';
 import { FeedbackManagementComponent } from './feedback-management/feedback-management.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { TrajetHistoryComponent } from './trajet-history/trajet-history.component';
+import { NotificationBellComponent } from './notification-bell/notification-bell.component';
 
 
 @NgModule({
@@ -46,7 +49,10 @@ import { FeedbackManagementComponent } from './feedback-management/feedback-mana
         TragetComponent,
         SalarieManagementComponent,
         BusManagementComponent,
-        FeedbackManagementComponent
+        FeedbackManagementComponent,
+        DashboardComponent,
+        TrajetHistoryComponent,
+        NotificationBellComponent
     ],
     providers: [
         ConfirmationService,

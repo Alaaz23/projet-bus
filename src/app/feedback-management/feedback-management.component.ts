@@ -30,6 +30,18 @@ export class FeedbackManagementComponent implements OnInit {
 
   constructor(private http: HttpClient, private toastr: ToastrService) {}
 
+  exportPdf(): void {
+    this.http.get(`${environment.apiUrl}/admin/export/feedbacks`, { responseType: 'blob' })
+      .subscribe(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `feedbacks_${new Date().toISOString().split('T')[0]}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      });
+  }
+
   ngOnInit(): void {
     this.loadFeedbacks();
   }

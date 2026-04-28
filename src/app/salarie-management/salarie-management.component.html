@@ -5,7 +5,12 @@
       <p>{{ auth.isAdmin() ? 'Recherche, édition et suppression des salariés.' : 'Consultez et modifiez vos informations personnelles.' }}</p>
     </div>
 
-    <button *ngIf="auth.canCreate()" (click)="openCreate()">+ Ajouter</button>
+    <div class="toolbar-actions">
+      <button *ngIf="auth.canCreate()" (click)="openCreate()">+ Ajouter</button>
+      <button *ngIf="auth.isAdmin()" class="btn-pdf" (click)="exportPdf()">
+        <i class="fas fa-file-pdf"></i> Exporter PDF
+      </button>
+    </div>
   </div>
 
   <div class="alerts" *ngIf="error || success">

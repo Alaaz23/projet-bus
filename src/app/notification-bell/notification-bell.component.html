@@ -1,0 +1,37 @@
+<div class="notif-wrapper">
+  <button class="bell-btn" (click)="toggle()">
+    <i class="fas fa-bell"></i>
+    <span class="badge" *ngIf="notifService.unreadCount > 0">
+      {{ notifService.unreadCount > 9 ? '9+' : notifService.unreadCount }}
+    </span>
+  </button>
+
+  <div class="notif-dropdown" *ngIf="isOpen">
+    <div class="notif-header">
+      <span><i class="fas fa-bell"></i> Notifications</span>
+      <button class="clear-btn" (click)="notifService.clear()">Tout effacer</button>
+    </div>
+
+    <div class="notif-empty" *ngIf="notifications.length === 0">
+      <i class="fas fa-check-circle"></i>
+      <span>Aucune notification</span>
+    </div>
+
+    <div class="notif-list">
+      <div class="notif-item"
+           *ngFor="let n of notifications"
+           [class.unread]="!n.read"
+           [class.clickable]="!!n.link"
+           (click)="navigate(n)">
+        <div class="notif-icon" [class]="'type-' + n.type">
+          <i [class]="typeIcon(n.type)"></i>
+        </div>
+        <div class="notif-content">
+          <div class="notif-title">{{ n.title }}</div>
+          <div class="notif-msg">{{ n.message }}</div>
+          <div class="notif-time">{{ timeAgo(n.timestamp) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

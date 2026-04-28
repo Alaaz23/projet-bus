@@ -15,6 +15,8 @@ import { LayoutComponent } from './layout/layout.component';
 import { SalarieManagementComponent } from './salarie-management/salarie-management.component';
 import { BusManagementComponent } from './bus-management/bus-management.component';
 import { FeedbackManagementComponent } from './feedback-management/feedback-management.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { TrajetHistoryComponent } from './trajet-history/trajet-history.component';
 import { authGuard } from './core/auth.guard';
 import { roleGuard } from './core/role.guard';
 
@@ -38,7 +40,9 @@ const routes: Routes = [
       { path: 'add-salarie', component: AddSalarieComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
       { path: 'update-salarie', component: UpdateSalarieComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
       { path: 'delete-salarie', component: DeleteSalariesComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
-      { path: 'feedbacks', component: FeedbackManagementComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } }
+      { path: 'feedbacks', component: FeedbackManagementComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'dashboard', component: DashboardComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } },
+      { path: 'trajets-history', component: TrajetHistoryComponent, canActivate: [roleGuard], data: { roles: ['ADMIN'] } }
     ]
   },
   { path: '**', redirectTo: 'home' }
