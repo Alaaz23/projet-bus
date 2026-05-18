@@ -50,7 +50,7 @@
                   <div class="select-wrapper">
                     <select class="form-control form-control-lg input100 select-wrapper" [(ngModel)]="selectedBus" name="busSelect">
                       <option value="" disabled selected hidden class="first-option">Select Bus</option>
-                      <option *ngFor="let bus of busList" [value]="bus.id">{{ bus.id }}</option>
+                      <option *ngFor="let bus of busList" [value]="bus.id">{{ bus.designation }} (id: {{ bus.id }})</option>
                     </select>
                   </div>
                 </div>

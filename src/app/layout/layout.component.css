@@ -5,33 +5,48 @@
   --accent: #ed7d31;
   --text: #12202b;
   --muted: #6c7b87;
+  --sidebar-w: 290px;
+  --topbar-h: 62px;
   display: block;
 }
 
 /* ===================== SHELL ===================== */
 .app-shell {
-  min-height: 100vh;
-  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  transition: grid-template-columns 0.25s ease;
   background:
     radial-gradient(circle at top right, rgba(237, 125, 49, 0.16), transparent 32%),
     radial-gradient(circle at bottom left, rgba(31, 146, 180, 0.15), transparent 30%),
     var(--bg);
 }
 
+/* ===================== COLLAPSED — sidebar fully hidden ===================== */
+.app-shell.collapsed {
+  grid-template-columns: 0 1fr;
+}
+
+.app-shell.collapsed .sidebar {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 /* ===================== SIDEBAR ===================== */
 .sidebar {
-  width: 290px;
-  min-width: 290px;
-  max-width: 290px;
-  flex-shrink: 0;
   background: linear-gradient(190deg, var(--panel), var(--panel-soft));
   color: #fff;
   padding: 1.2rem;
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow: hidden;   /* clips text when width shrinks */
-  transition: width 0.25s ease, min-width 0.25s ease, max-width 0.25s ease, padding 0.25s ease;
+  overflow: hidden;
+  overflow-y: auto;
+  min-width: 0;
+  transition: padding 0.25s ease;
 }
 
 .brand {
@@ -43,6 +58,7 @@
   margin-bottom: 1.8rem;
   font-family: 'Sora', sans-serif;
   font-weight: 600;
+  overflow: hidden;
   white-space: nowrap;
 }
 
@@ -91,22 +107,17 @@
   white-space: nowrap;
 }
 
-/* ===================== COLLAPSED ===================== */
-.app-shell.collapsed .sidebar {
-  width: 0;
-  min-width: 0;
-  max-width: 0;
-  padding: 0;
-}
-
 /* ===================== CONTENT ===================== */
 .content {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100vh;
+  overflow: hidden;
 }
 
+/* ===================== TOPBAR ===================== */
 .topbar {
   position: sticky;
   top: 0;
@@ -114,10 +125,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.4rem;
-  background: rgba(255, 255, 255, 0.76);
+  padding: 0.75rem 1.4rem;
+  height: var(--topbar-h);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(15, 42, 61, 0.08);
+  flex-shrink: 0;
 }
 
 .menu-toggle {
@@ -129,6 +142,7 @@
   font-size: 1.1rem;
   cursor: pointer;
   flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 .topbar-meta {
@@ -137,6 +151,7 @@
   gap: 0.85rem;
   color: var(--text);
   font-family: 'Manrope', sans-serif;
+  flex-wrap: wrap;
 }
 
 .role {
@@ -154,219 +169,60 @@
   background: var(--accent);
   color: #fff;
   cursor: pointer;
-}
-
-.page-body {
-  padding: 1.3rem;
-}
-
-/* ===================== MOBILE ===================== */
-@media (max-width: 900px) {
-  .app-shell {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-    min-width: 100%;
-    max-width: 100%;
-    height: auto;
-    position: static;
-  }
-
-  .app-shell.collapsed .sidebar {
-    width: 100%;
-    min-width: 100%;
-    max-width: 100%;
-    height: 0;
-    padding: 0;
-  }
-}
-
-
-.app-shell {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top right, rgba(237, 125, 49, 0.16), transparent 32%),
-    radial-gradient(circle at bottom left, rgba(31, 146, 180, 0.15), transparent 30%),
-    var(--bg);
-  display: grid;
-  grid-template-columns: 290px 1fr;
-  transition: grid-template-columns 0.25s ease;
-}
-
-.sidebar {
-  background: linear-gradient(190deg, var(--panel), var(--panel-soft));
-  color: #fff;
-  padding: 1.2rem;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
-  overflow-y: auto;
-  min-width: 0;       /* permet au grid de comprimer en dessous du contenu */
-  transition: padding 0.25s ease;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  color: #fff;
-  text-decoration: none;
-  margin-bottom: 1.8rem;
-  font-family: 'Sora', sans-serif;
   font-weight: 600;
-  overflow: hidden;   /* empêche le texte de forcer une largeur */
+  font-size: 0.88rem;
   white-space: nowrap;
 }
 
-.brand img {
-  width: 38px;
-  height: 38px;
-  object-fit: contain;
-}
-
-.menu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.menu a {
-  color: rgba(255, 255, 255, 0.86);
-  text-decoration: none;
-  padding: 0.65rem 0.75rem;
-  border-radius: 10px;
-  transition: 0.2s ease;
-  font-family: 'Manrope', sans-serif;
-  white-space: nowrap;
-  overflow: hidden;
-  display: block;
-}
-
-.menu a:hover,
-.menu a.active {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-}
-
-.menu-group {
-  margin-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
-  padding-top: 1rem;
-}
-
-.menu-group p {
-  margin: 0 0 0.6rem;
-  color: rgba(255, 255, 255, 0.64);
-  text-transform: uppercase;
-  font-size: 0.73rem;
-  letter-spacing: 0.08em;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 15;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.4rem;
-  background: rgba(255, 255, 255, 0.76);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(15, 42, 61, 0.08);
-}
-
-.menu-toggle {
-  border: 0;
-  background: #fff;
-  border-radius: 10px;
-  width: 38px;
-  height: 38px;
-  cursor: pointer;
-}
-
-.topbar-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  color: var(--text);
-  font-family: 'Manrope', sans-serif;
-}
-
-.role {
-  padding: 0.22rem 0.55rem;
-  background: rgba(15, 42, 61, 0.08);
-  border-radius: 999px;
-  color: var(--muted);
-  font-size: 0.84rem;
-}
-
-.logout {
-  border: none;
-  padding: 0.45rem 0.9rem;
-  border-radius: 9px;
-  background: var(--accent);
-  color: #fff;
-  cursor: pointer;
-}
-
+/* ===================== PAGE BODY ===================== */
 .page-body {
   padding: 1.3rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
-.app-shell.collapsed {
-  grid-template-columns: 76px 1fr;
-}
-
-.app-shell.collapsed .sidebar {
-  padding: 1.2rem 0.4rem;
-  overflow: hidden;
-}
-
-/* Cacher le texte des liens mais garder l'icône de zone cliquable */
-.app-shell.collapsed .brand span,
-.app-shell.collapsed .menu-group p,
-.app-shell.collapsed .menu a {
-  font-size: 0;
-  letter-spacing: 0;
-}
-
-.app-shell.collapsed .menu a {
-  display: block;
-  padding: 0.65rem 0;
-  text-align: center;
-  height: 38px;
-}
-
-.app-shell.collapsed .brand {
-  justify-content: center;
-}
-
-.app-shell.collapsed .brand img {
-  margin: 0;
-}
-
+/* ===================== MOBILE ≤ 900px ===================== */
 @media (max-width: 900px) {
   .app-shell,
   .app-shell.collapsed {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    overflow: hidden;
   }
 
   .sidebar {
     position: static;
     height: auto;
+    width: 100%;
+    max-height: 260px;
+    overflow-y: auto;
   }
 
-  /* Sur mobile : cacher le sidebar quand collapsed */
   .app-shell.collapsed .sidebar {
     display: none;
   }
+
+  .topbar-meta {
+    gap: 0.5rem;
+  }
+
+  .topbar-meta strong,
+  .role {
+    display: none;
+  }
 }
+
+/* ===================== SMALL MOBILE ≤ 480px ===================== */
+@media (max-width: 480px) {
+  .topbar {
+    padding: 0.6rem 0.8rem;
+  }
+
+  .page-body {
+    padding: 0.8rem;
+  }
+}
+
+

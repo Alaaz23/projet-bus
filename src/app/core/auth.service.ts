@@ -29,7 +29,8 @@ export class AuthService {
                 username: response.username,
                 role: (response.role || 'USER') as UserRole,
                 displayName: response.displayName,
-                token: response.token
+                token: response.token,
+                busId: response.busId ?? null,
               };
 
               localStorage.setItem(this.storageKey, JSON.stringify(authUser));

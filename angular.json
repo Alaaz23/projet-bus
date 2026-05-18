@@ -17,7 +17,8 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "src/global-polyfill.ts"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -37,6 +38,14 @@
               "src/assets/css/style.css",
               "node_modules/leaflet-control-geocoder/dist/Control.Geocoder.css",
               "node_modules/leaflet-search/dist/leaflet-search.src.css"
+          ],
+          "allowedCommonJsDependencies": [
+            "leaflet",
+            "leaflet-routing-machine",
+            "leaflet-control-geocoder",
+            "leaflet-search",
+            "sockjs-client",
+            "@stomp/stompjs"
           ],
           "scripts": [
               "node_modules/leaflet/dist/leaflet.js",

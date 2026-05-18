@@ -1,5 +1,5 @@
 .feedback-page {
-  padding: 2rem;
+  padding: 0;
 }
 
 .page-header {
@@ -172,4 +172,10 @@
 
 .btn-validate:hover {
   background: #1d4ed8;
+}
+
+@media (max-width: 600px) {
+  .feedback-page { padding: 0.8rem; }
+  .page-header { flex-wrap: wrap; gap: 0.4rem; }
+  .feedback-grid { grid-template-columns: 1fr; }
 }

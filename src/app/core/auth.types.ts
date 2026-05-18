@@ -5,4 +5,5 @@ export interface AuthUser {
   role: UserRole;
   displayName: string;
   token: string;
+  busId?: number | null;
 }

@@ -1,36 +1,114 @@
-<div id="map"></div>
+﻿<div id="map"></div>
 
-<form (ngSubmit)="onSearch()" class="custom-search-container">
-  <input type="text" [(ngModel)]="searchQuery" name="searchQuery" placeholder="Search" (input)="onInputChange()" autocomplete="off" class="custom-search-input">
-  <button type="submit" class="custom-search-button">Search</button>
-</form>
+<!-- ── Bannières de statut (style mobile Flutter) ────────────── -->
+<div class="map-top-banners">
+  <div class="banner-warning" *ngIf="noDataWarning">
+    <i class='bx bx-error-circle'></i>
+    Position du bus non disponible
+  </div>
+  <div class="banner-eta" *ngIf="etaInfo && trackingActive">
+    <i class='bx bx-time-five'></i>
+    Arrivée dans ~{{ etaInfo.durationMin }} min&nbsp;·&nbsp;{{ etaInfo.distKm }} km
+    <span class="banner-eta-dest">{{ etaInfo.destName }}</span>
+  </div>
+  <div class="banner-loading" *ngIf="routeLoading">
+    <span class="banner-spinner"></span>
+    Calcul de l'itinéraire...
+  </div>
+</div>
 
-<select id="target" name="target" [(ngModel)]="traget" (change)="onSelectTraget()">
-  <option value="" selected>Sélectionnez un trajet</option>
-  <option *ngFor="let trajet of tragetsList" [value]="trajet.id">{{ trajet.libelle }}</option>
-</select>
+<!-- ── Panneau GPS Tracking (temps réel) ──────────────── -->
+<div class="gps-tracking-panel">
+  <div class="gps-panel-header">
+    <i class='bx bx-map-pin'></i>
+    Suivi GPS Temps Réel
+    <span class="gps-status-dot" [class.active]="trackingActive && !noDataWarning"></span>
+  </div>
 
+  <div class="gps-panel-body">
+    <select [(ngModel)]="selectedBusId" class="gps-bus-select" [disabled]="trackingActive">
+      <option [ngValue]="null">-- Choisir un bus --</option>
+      <option *ngFor="let bus of busList" [ngValue]="bus.id">
+        {{ bus.designation }} (ID {{ bus.id }})
+      </option>
+    </select>
 
-<ul [ngClass]="{ 'suggestions': true, 'show': showSuggestions }" class="suggestions">
-  <li *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)">{{ suggestion }}</li>
-</ul>
+    <div class="gps-actions">
+      <button class="btn-track" (click)="startTracking()" [disabled]="trackingActive">
+        <i class='bx bx-play'></i> Démarrer
+      </button>
+      <button class="btn-stop" (click)="stopTracking()" [disabled]="!trackingActive">
+        <i class='bx bx-stop'></i> Arrêter
+      </button>
+    </div>
 
-<button class="save-button" (click)="onSave()">
-  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='23' height='23' fill='white' class='bi bi-plus-lg' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2'/%3E%3C/svg%3E" alt="Plus icon">
-  Save
-</button>
+    <button class="btn-detect" (click)="autoDetectBus()" [disabled]="trackingActive">
+      <i class='bx bx-search-alt'></i> Détecter bus actif
+    </button>
 
-<button class="reset-button" (click)="resetMarkers()">
-  <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-  </svg>
-  Reset
-</button>
+    <div class="gps-info" *ngIf="gpsInfo">
+      <div class="gps-info-row"><span>Bus ID</span><strong>{{ gpsInfo.busId }}</strong></div>
+      <div class="gps-info-row"><span>Latitude</span><strong>{{ gpsInfo.lat | number:'1.5-5' }}</strong></div>
+      <div class="gps-info-row"><span>Longitude</span><strong>{{ gpsInfo.lng | number:'1.5-5' }}</strong></div>
+      <div class="gps-info-row"><span>Vitesse</span><strong>{{ gpsInfo.speed | number:'1.1-1' }} km/h</strong></div>
+      <div class="gps-info-row"><span>Heure</span><strong>{{ gpsInfo.timestamp | date:'HH:mm:ss' }}</strong></div>
+    </div>
 
-<button class="undo-button" (click)="removeLastMarkerAndRoute()">
-  <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
-    <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
-    <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
-  </svg>
-  Undo
-</button>
+    <!-- ETA / Estimation d'arrivée -->
+    <div class="eta-panel" *ngIf="etaInfo">
+      <div class="eta-header">
+        <i class='bx bx-flag'></i>
+        <span>{{ etaInfo.destName }}</span>
+      </div>
+      <div class="eta-row">
+        <span>Distance restante</span>
+        <strong>{{ etaInfo.distKm }} km</strong>
+      </div>
+      <div class="eta-row">
+        <span>Temps estimé</span>
+        <strong>{{ etaInfo.durationMin }} min</strong>
+      </div>
+      <div class="eta-row eta-arrival">
+        <span>Arrivée prévue</span>
+        <strong class="eta-time"><i class='bx bx-time'></i> {{ etaInfo.arrivalTime }}</strong>
+      </div>
+    </div>
+
+    <div class="gps-warn" *ngIf="noDataWarning">
+      <i class='bx bx-error'></i> Aucune donnée GPS pour ce bus.<br>
+      Cliquez sur <b>Détecter bus actif</b> ou lancez la simulation avec<br>
+      <code>python gps_sender.py --bus-id {{ selectedBusId }} --loop</code>
+    </div>
+
+    <div class="gps-no-data" *ngIf="trackingActive && !gpsInfo && !noDataWarning">
+      En attente des données GPS...
+    </div>
+
+    <div class="gps-no-data" *ngIf="routeLoading" style="color:#1a73e8;font-style:normal;">
+      <i class='bx bx-map-alt'></i> Calcul du trajet sur routes réelles...
+    </div>
+
+    <!-- ── Ma position (GPS passager) ──────────────────────── -->
+    <div style="border-top:1px solid #e0e0e0;margin-top:10px;padding-top:10px;">
+      <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px;">
+        <i class='bx bx-current-location'></i> Ma position (passager)
+      </div>
+      <button
+        class="btn-detect"
+        (click)="startUserTracking()"
+        [style.background]="userLocationActive ? '#e53935' : '#34a853'"
+        style="width:100%;">
+        <i [class]="userLocationActive ? 'bx bx-stop' : 'bx bx-current-location'"></i>
+        {{ userLocationActive ? 'Arrêter ma position' : 'Afficher ma position' }}
+      </button>
+      <div *ngIf="userGpsInfo" class="gps-info" style="margin-top:6px;">
+        <div class="gps-info-row"><span>Latitude</span><strong>{{ userGpsInfo.lat | number:'1.5-5' }}</strong></div>
+        <div class="gps-info-row"><span>Longitude</span><strong>{{ userGpsInfo.lng | number:'1.5-5' }}</strong></div>
+        <div class="gps-info-row"><span>Précision</span><strong>±{{ userGpsInfo.accuracy }} m</strong></div>
+      </div>
+      <div *ngIf="userLocationError" style="color:#e53935;font-size:11px;margin-top:4px;">
+        <i class='bx bx-error-circle'></i> {{ userLocationError }}
+      </div>
+    </div>
+  </div>
+</div>
