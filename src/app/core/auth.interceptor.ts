@@ -24,6 +24,12 @@ export class AuthTokenInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
 
+    // Ne pas intercepter les APIs externes (OSRM, Nominatim, etc.)
+    // — ajouter Authorization sur une URL externe cause un échec CORS preflight
+    if (req.url.startsWith('https://') && !req.url.includes('localhost')) {
+      return next.handle(req);
+    }
+
     const currentUser = this.auth.currentUser;
     let authReq = req;
 
