@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import * as L from 'leaflet';
 import 'leaflet-routing-machine';
 import * as GeoSearch from 'leaflet-geosearch';
@@ -240,6 +240,8 @@ export class MapComponent implements OnInit, OnDestroy {
   private simInterval: any = null;
   /** true si une vraie donnée WebSocket est arrivée (désactive la simulation) */
   private realGpsActive = false;
+  /** Timestamp du dernier calcul ETA local (throttlé à 5s, = Flutter _lastEtaCalc) */
+  private lastEtaCalcMs = 0;
   /** Position actuelle animée du marker (interp. entre deux updates GPS) */
   private currentMarkerPos: L.LatLng | null = null;
   /** ID requestAnimationFrame en cours (pour annulation propre) */
@@ -274,7 +276,7 @@ export class MapComponent implements OnInit, OnDestroy {
   userGpsInfo: { lat: number; lng: number; accuracy: number } | null = null;
 
   /** Configuration de route active — chargée depuis l'API backend ou BUS_ROUTES en fallback */
-  private activeRouteConfig: RouteConfig | null = null;
+  activeRouteConfig: RouteConfig | null = null;
 
   constructor(private http: HttpClient, private toastr: ToastrService, private gpsWs: GpsWebSocketService, private auth: AuthService) { }
 
@@ -494,35 +496,14 @@ export class MapComponent implements OnInit, OnDestroy {
       .bindPopup(`<b>Bus ${this.selectedBusId}</b><br>🚏 ${route?.depName ?? 'Départ'}<br>⏳ Chargement de la position...`)
       .openPopup();
 
-    // 2. Initialiser la ligne du chemin parcouru au point de départ
-    this.traveledPoints = [L.latLng(startLat, startLng)];
+    // 2. Initialiser la ligne du chemin parcouru (vide — remplie dès les premiers GPS réels)
+    this.traveledPoints = [];
     this.traveledLine = L.polyline(this.traveledPoints, {
       color: '#e53935', weight: 4, opacity: 0.85,
     }).addTo(this.map!);
 
-    // 3. Récupérer la DERNIÈRE POSITION CONNUE en base — place le bus là où il est réellement
+    // 3. Pas de fetch de position précédente — le bus démarre toujours au point de départ
     this.lastKnownPos = null;
-    this.http.get<any>(`${environment.apiUrl}/gps/bus/${this.selectedBusId}/latest`).subscribe({
-      next: (pos) => {
-        if (!pos?.latitude || !pos?.longitude) return;
-        const ageMs = Date.now() - new Date(pos.timestamp).getTime();
-        if (ageMs > 600_000) return; // ignorer si > 10 min
-        const latLng = L.latLng(pos.latitude, pos.longitude);
-        this.lastKnownPos = latLng;
-        this.currentMarkerPos = latLng;
-        if (this.gpsMarker) {
-          const bearing = pos.bearing ?? 0;
-          this.gpsMarker.setLatLng(latLng);
-          this.gpsMarker.setIcon(makeBusIcon(bearing));
-          this.gpsMarker.setPopupContent(this.buildPopupContent(pos));
-          this.map?.panTo(latLng, { animate: true, duration: 0.8 });
-          console.log(`[GPS-Init] ✅ Position initiale récupérée : ${pos.latitude.toFixed(5)}, ${pos.longitude.toFixed(5)} (il y a ${Math.round(ageMs/1000)}s)`);
-        }
-        this.traveledPoints = [latLng];
-        if (this.traveledLine) this.traveledLine.setLatLngs([latLng]);
-      },
-      error: () => console.log('[GPS-Init] Aucune position en base — simulation depuis le départ'),
-    });
 
     // 4. Tracer le circuit planifié (direct + OSRM segment par segment)
     this.drawPlannedRoute(this.selectedBusId);
@@ -680,13 +661,31 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   private async fetchOsrmRoute(routingWps: [number, number][]): Promise<L.LatLng[]> {
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // ① Valhalla — moteur de routing qui interdit les ferries nativement
-    // ─────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────────
+    // ① OSRM — identique au simulateur standalone (même trajet, route sud du lac)
+    // ─────────────────────────────────────────────────────────────────────────────
+    try {
+      const coordStr = routingWps.map(([lat, lng]) => `${lng},${lat}`).join(';');
+      const radiuses = routingWps.map(() => '500').join(';');
+      const osrmUrl = `${OSRM_URL}/${coordStr}?overview=full&geometries=geojson&radiuses=${radiuses}`;
+      const res = await Promise.race([
+        this.http.get<any>(osrmUrl).toPromise(),
+        new Promise<never>((_, rej) => setTimeout(() => rej(new Error('osrm timeout')), 10000)),
+      ]);
+      const coords = (res as any)?.routes?.[0]?.geometry?.coordinates;
+      if (coords?.length >= 2) {
+        console.log(`[OSRM] ✅ Route : ${coords.length} points`);
+        return (coords as [number, number][]).map(([lng, lat]) => L.latLng(lat, lng));
+      }
+    } catch (e) {
+      console.warn('[OSRM] Échec — fallback Valhalla', e);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // ② Valhalla — fallback si OSRM inaccessible (use_ferry:0)
+    // ─────────────────────────────────────────────────────────────────────────────
     try {
       const body = {
-        // Départ et arrivée = "break" (arrêt complet), stations intermédiaires = "through"
-        // "through" évite les demi-tours et boucles aux stations intermédiaires
         locations: routingWps.map(([lat, lon], i) => ({
           lat, lon,
           type: (i === 0 || i === routingWps.length - 1) ? 'break' : 'through',
@@ -702,42 +701,21 @@ export class MapComponent implements OnInit, OnDestroy {
       const all: L.LatLng[] = [];
       for (let i = 0; i < legs.length; i++) {
         const pts = this.decodePolyline(legs[i].shape);
-        if (i > 0 && pts.length) pts.shift(); // éviter doublon de jonction
+        if (i > 0 && pts.length) pts.shift();
         all.push(...pts);
       }
       if (all.length >= 2) {
-        console.log(`[Valhalla] ✅ Route sans ferry : ${all.length} points`);
+        console.log(`[Valhalla] ✅ Route fallback : ${all.length} points`);
         return all;
       }
     } catch (e) {
-      console.warn('[Valhalla] Échec — fallback OSRM', e);
+      console.warn('[Valhalla] Échec — fallback lignes directes', e);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // ② OSRM — sans exclude=ferry (évite les "no route" qui causaient le fallback)
-    // ─────────────────────────────────────────────────────────────────────────
-    try {
-      const coordStr = routingWps.map(([lat, lng]) => `${lng},${lat}`).join(';');
-      const radiuses = routingWps.map(() => '500').join(';');
-      const osrmUrl = `${OSRM_URL}/${coordStr}?overview=full&geometries=geojson&radiuses=${radiuses}`;
-      const res = await Promise.race([
-        this.http.get<any>(osrmUrl).toPromise(),
-        new Promise<never>((_, rej) => setTimeout(() => rej(new Error('osrm timeout')), 10000)),
-      ]);
-      const coords = (res as any)?.routes?.[0]?.geometry?.coordinates;
-      if (coords?.length >= 2) {
-        console.log(`[OSRM] ✅ Route : ${coords.length} points`);
-        return (coords as [number, number][]).map(([lng, lat]) => L.latLng(lat, lng));
-      }
-    } catch (e) {
-      console.warn('[OSRM] Échec — fallback lignes directes via points pont', e);
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // ③ Fallback visible — lignes directes via ROUTING_WAYPOINTS (pont de Radès inclus)
-    //    Chaque segment est ≤1.5 km → aucun ne traverse le lac directement
-    // ─────────────────────────────────────────────────────────────────────────
-    console.warn('[Route] ⚠️ Valhalla + OSRM inaccessibles — polyline de secours (via pont)');
+    // ─────────────────────────────────────────────────────────────────────────────
+    // ③ Fallback visible — lignes directes
+    // ─────────────────────────────────────────────────────────────────────────────
+    console.warn('[Route] ⚠️ OSRM + Valhalla inaccessibles — polyline de secours');
     return routingWps.map(([lat, lng]) => L.latLng(lat, lng));
   }
 
@@ -775,6 +753,22 @@ export class MapComponent implements OnInit, OnDestroy {
   private onGpsData(pos: any): void {
     const newLat: number = pos.latitude;
     const newLng: number = pos.longitude;
+
+    // ── Validation coordonnées (= Flutter _isCoordsValid / _isInTunisiaRegion) ──
+    if (!this.isValidCoord(newLat, newLng) || !this.isInTunisia(newLat, newLng)) {
+      console.warn(`[GPS] Coordonnées invalides ignorées: ${newLat}, ${newLng}`);
+      return;
+    }
+    // Rejeter si > 3 000 m de tout waypoint (données GPS périmées = Flutter)
+    if (this.activeRouteConfig) {
+      const rawPt   = L.latLng(newLat, newLng);
+      const minDist = Math.min(...this.activeRouteConfig.waypoints.map(
+        ([wlat, wlng]: [number, number]) => rawPt.distanceTo(L.latLng(wlat, wlng))));
+      if (minDist > 3000) {
+        console.warn(`[GPS] Position hors trajet (${Math.round(minDist)}m) — ignorée`);
+        return;
+      }
+    }
 
     // Cap : priorité au bearing envoyé par le simulateur, sinon calculé depuis position précédente
     let newBearing: number = this.lastBearing;
@@ -815,8 +809,19 @@ export class MapComponent implements OnInit, OnDestroy {
       this.currentMarkerPos = snappedLatLng;
     }
 
-    // ── Chemin parcouru (ligne rouge qui s'allonge) ───────────────────────────
-    this.traveledPoints.push(snappedLatLng);
+    // ── Chemin parcouru (ligne rouge) ─────────────────────────────────────────
+    // Si le dernier point connu est > 500 m du point snappé (1er GPS réel après
+    // initialisation artificielle, ou redémarrage), on repart proprement depuis ici.
+    {
+      const _last = this.traveledPoints[this.traveledPoints.length - 1];
+      const _jump = _last ? _last.distanceTo(snappedLatLng) : Infinity;
+      if (_jump > 500) {
+        this.traveledPoints = [snappedLatLng];
+      } else {
+        this.traveledPoints.push(snappedLatLng);
+        if (this.traveledPoints.length > 500) this.traveledPoints.shift();
+      }
+    }
     if (this.traveledLine) {
       this.traveledLine.setLatLngs(this.traveledPoints);
     }
@@ -837,7 +842,7 @@ export class MapComponent implements OnInit, OnDestroy {
       }
     }
 
-    this.updateETA();
+    this.calcLocalEta();
   }
 
 
@@ -863,16 +868,23 @@ export class MapComponent implements OnInit, OnDestroy {
     const SPEED_M_PER_S = 12; // ≈ 43 km/h (vitesse bus urbain)
     let lastTime: number | null = null;
 
-    // Trouver le segment de départ : si on a une position connue, chercher le point le plus proche
+    // Trouver le segment de départ : si position connue à ≤ 2 km → reprendre (= Flutter)
     this.simSegIdx = 0;
     this.simSegT = 0;
     if (this.lastKnownPos) {
       let bestDist = Infinity;
+      let bestIdx  = 0;
       for (let i = 0; i < pts.length - 1; i++) {
         const d = pts[i].distanceTo(this.lastKnownPos);
-        if (d < bestDist) { bestDist = d; this.simSegIdx = i; }
+        if (d < bestDist) { bestDist = d; bestIdx = i; }
       }
-      console.log(`[SIM] ▶ Reprise depuis l'index ${this.simSegIdx}/${pts.length} (position connue)`);
+      if (bestDist <= 2000) {
+        this.simSegIdx = bestIdx;
+        console.log(`[SIM] ▶ Reprise depuis l'index ${this.simSegIdx}/${pts.length} (${Math.round(bestDist)}m)`);
+      } else {
+        this.simSegIdx = 0;
+        console.log(`[SIM] ▶ Position trop éloignée (${Math.round(bestDist)}m > 2km) — démarrage depuis le début`);
+      }
     } else {
       console.log(`[SIM] ▶ Démarrage depuis le début — ${pts.length} points, vitesse ${SPEED_M_PER_S} m/s`);
     }
@@ -950,9 +962,25 @@ export class MapComponent implements OnInit, OnDestroy {
       this.gpsMarker.setIcon(makeBusIcon(bearing));
       this.currentMarkerPos = pos;
 
-      // Allonger la ligne parcourue
-      this.traveledPoints.push(pos);
+      // Allonger la ligne parcourue — anti-saut + cap 500 pts
+      {
+        const _simLast = this.traveledPoints[this.traveledPoints.length - 1];
+        const _simJump = _simLast ? _simLast.distanceTo(pos) : Infinity;
+        if (_simJump > 500) {
+          this.traveledPoints = [pos];
+        } else {
+          this.traveledPoints.push(pos);
+          if (this.traveledPoints.length > 500) this.traveledPoints.shift();
+        }
+      }
       if (this.traveledLine) this.traveledLine.setLatLngs(this.traveledPoints);
+
+      // ETA local (throttlé : max 1 fois toutes les 5 secondes = Flutter)
+      const nowEtaMs = Date.now();
+      if (nowEtaMs - this.lastEtaCalcMs >= 5000) {
+        this.lastEtaCalcMs = nowEtaMs;
+        this.calcLocalEta();
+      }
 
       // Re-centrer la carte si nécessaire
       if (this.map) {
@@ -1021,6 +1049,63 @@ export class MapComponent implements OnInit, OnDestroy {
       }
     };
     this.animFrameId = requestAnimationFrame(step);
+  }
+
+  /** Vérifie que des coordonnées lat/lng sont valides (= Flutter _isCoordsValid) */
+  private isValidCoord(lat: number, lng: number): boolean {
+    return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 && !(lat === 0 && lng === 0);
+  }
+
+  /** Vérifie que les coordonnées sont dans la zone Tunisie (= Flutter _isInTunisiaRegion) */
+  private isInTunisia(lat: number, lng: number): boolean {
+    return lat >= 30.0 && lat <= 38.5 && lng >= 7.0 && lng <= 12.5;
+  }
+
+  /**
+   * Calcule l'ETA localement depuis la position courante sur la route (= Flutter _calcLocalEta).
+   * Utilise simSegIdx/simSegT en simulation, sinon cherche le segment le plus proche.
+   * Aucun appel réseau — fonctionne en simulation et en mode GPS réel.
+   */
+  private calcLocalEta(): void {
+    const pts   = this.routePoints;
+    const route = this.activeRouteConfig;
+    if (pts.length < 2 || !route) return;
+
+    let remainingM = 0;
+    let startIdx: number;
+
+    if (this.animFrameId !== null && !this.realGpsActive) {
+      // Mode simulation : utiliser l'index de segment courant
+      const idx    = Math.min(this.simSegIdx, pts.length - 2);
+      const segLen = pts[idx].distanceTo(pts[idx + 1]);
+      remainingM  += segLen * (1 - this.simSegT);
+      startIdx     = idx + 1;
+    } else {
+      // Mode GPS réel : trouver le segment le plus proche
+      if (!this.gpsInfo) return;
+      const cur = L.latLng(this.gpsInfo.lat, this.gpsInfo.lng);
+      let bestDist = Infinity, bestIdx = 0;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const d = pts[i].distanceTo(cur);
+        if (d < bestDist) { bestDist = d; bestIdx = i; }
+      }
+      startIdx = bestIdx;
+    }
+
+    for (let i = startIdx; i < pts.length - 1; i++) {
+      remainingM += pts[i].distanceTo(pts[i + 1]);
+    }
+    if (remainingM <= 0) { this.etaInfo = null; return; }
+
+    // Vitesse GPS si disponible (> 7.2 km/h = 2 m/s), sinon constante 12 m/s (= Flutter)
+    const speedKmh    = this.gpsInfo?.speed ?? 0;
+    const speedMs     = speedKmh > 7.2 ? speedKmh / 3.6 : 12;
+    const durationSec = remainingM / speedMs;
+    const durationMin = Math.ceil(durationSec / 60);
+    const distKm      = Math.round(remainingM / 100) / 10;
+    const arrivalDate = new Date(Date.now() + durationSec * 1000);
+    const arrivalTime = arrivalDate.toLocaleTimeString('fr-TN', { hour: '2-digit', minute: '2-digit' });
+    this.etaInfo = { distKm, durationMin, arrivalTime, destName: route.destName };
   }
 
   /** Calcule le cap en degrés entre deux points GPS */
@@ -1172,12 +1257,11 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   private initMap(): void {
-    this.map = L.map('map').setView([36.77, 10.18], 12);
+    this.map = L.map('map').setView([36.831585, 10.232803], 13);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20,
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
     }).addTo(this.map);
 
     //this.addSearchControl();

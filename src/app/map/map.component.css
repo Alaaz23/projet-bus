@@ -549,3 +549,25 @@ select:focus {
   }
 }
 
+
+.btn-locate {
+  width: 100%;
+  padding: 7px 0;
+  border: 1.5px solid #4285f4;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  color: #4285f4;
+  transition: background 0.2s;
+  margin-top: 6px;
+}
+.btn-locate:hover { background: #e8f0fe; }
+.btn-locate-active { background: #4285f4 !important; color: #fff !important; }
+
+.gps-user-info {
+  margin-top: 6px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 6px;
+}

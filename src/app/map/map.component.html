@@ -46,7 +46,18 @@
       <i class='bx bx-search-alt'></i> Détecter bus actif
     </button>
 
+    <button class="btn-locate" (click)="startUserTracking()" [class.btn-locate-active]="userLocationActive">
+      📍 {{ userLocationActive ? 'Arrêter ma position' : 'Ma position' }}
+    </button>
+
+    <div class="gps-user-info" *ngIf="userGpsInfo">
+      <div class="gps-info-row"><span>Ma lat</span><strong>{{ userGpsInfo.lat | number:'1.5-5' }}</strong></div>
+      <div class="gps-info-row"><span>Ma lng</span><strong>{{ userGpsInfo.lng | number:'1.5-5' }}</strong></div>
+      <div class="gps-info-row"><span>Précision</span><strong>±{{ userGpsInfo.accuracy }} m</strong></div>
+    </div>
+
     <div class="gps-info" *ngIf="gpsInfo">
+      <div class="gps-info-row" *ngIf="activeRouteConfig"><span>Ligne</span><strong>{{ activeRouteConfig.depName }} → {{ activeRouteConfig.destName }}</strong></div>
       <div class="gps-info-row"><span>Bus ID</span><strong>{{ gpsInfo.busId }}</strong></div>
       <div class="gps-info-row"><span>Latitude</span><strong>{{ gpsInfo.lat | number:'1.5-5' }}</strong></div>
       <div class="gps-info-row"><span>Longitude</span><strong>{{ gpsInfo.lng | number:'1.5-5' }}</strong></div>
