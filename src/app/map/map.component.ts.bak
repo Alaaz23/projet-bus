@@ -741,35 +741,49 @@ export class MapComponent implements OnInit, OnDestroy {
     return routingWps.map(([lat, lng]) => L.latLng(lat, lng));
   }
 
-  /** Calcule l'ETA depuis la position actuelle jusqu'à la destination (throttlé 10 s) */
+  /** Calcule l'ETA localement depuis la position courante sur la route (throttlé 5 s) */
   private updateETA(): void {
-    if (!this.gpsInfo || !this.selectedBusId) return;
     const route = this.activeRouteConfig;
-    if (!route) return;
+    if (!route || !this.selectedBusId) return;
+    const pts = this.routePoints;
+    if (pts.length < 2) return;
+
     const now = Date.now();
-    if (now - this.lastEtaUpdate < 10_000) return;
+    if (now - this.lastEtaUpdate < 5_000) return;
     this.lastEtaUpdate = now;
 
-    const { lat, lng } = this.gpsInfo;
-    const [destLat, destLng] = route.dest;
-    const url = `${OSRM_URL}/${lng},${lat};${destLng},${destLat}?overview=false`;
+    // ── 1. Distance restante sur la route ────────────────────────
+    let remainingM = 0;
+    if (this.simSegIdx < pts.length - 1) {
+      const segLen = pts[this.simSegIdx].distanceTo(pts[this.simSegIdx + 1]);
+      remainingM += segLen * (1 - this.simSegT);
+      for (let i = this.simSegIdx + 1; i < pts.length - 1; i++) {
+        remainingM += pts[i].distanceTo(pts[i + 1]);
+      }
+    }
 
-    this.http.get<any>(url).subscribe({
-      next: (res) => {
-        if (!res.routes?.length) return;
-        const r = res.routes[0];
-        const distKm = Math.round((r.distance / 1000) * 10) / 10;
-        const durationMin = Math.round(r.duration / 60);
-        const arrivalDate = new Date(Date.now() + r.duration * 1000);
-        this.etaInfo = {
-          distKm,
-          durationMin,
-          arrivalTime: arrivalDate.toLocaleTimeString('fr-TN', { hour: '2-digit', minute: '2-digit' }),
-          destName: route.destName,
-        };
-      },
-      error: () => console.warn('Impossible de calculer l\'ETA'),
-    });
+    if (remainingM <= 0) {
+      this.etaInfo = null;
+      return;
+    }
+
+    // ── 2. Vitesse effective ──────────────────────────────────────
+    const SPEED_M_PER_S = 12; // simulation : 43.2 km/h
+    const effectiveSpeed = (this.realGpsActive && this.gpsInfo && this.gpsInfo.speed > 2)
+      ? this.gpsInfo.speed / 3.6   // vitesse GPS réelle km/h → m/s
+      : SPEED_M_PER_S;
+
+    // ── 3. Calcul ETA ─────────────────────────────────────────────
+    const durationSec = remainingM / effectiveSpeed;
+    const durationMin = Math.ceil(durationSec / 60);
+    const distKm = Math.round(remainingM / 100) / 10;
+    const arrivalDate = new Date(Date.now() + durationSec * 1000);
+    this.etaInfo = {
+      distKm,
+      durationMin,
+      arrivalTime: arrivalDate.toLocaleTimeString('fr-TN', { hour: '2-digit', minute: '2-digit' }),
+      destName: route.destName,
+    };
   }
 
   private onGpsData(pos: any): void {
@@ -962,6 +976,9 @@ export class MapComponent implements OnInit, OnDestroy {
         const inner = L.latLngBounds([sw.lat + mLat, sw.lng + mLng], [ne.lat - mLat, ne.lng - mLng]);
         if (!inner.contains(pos)) this.map.panTo(pos, { animate: true, duration: 0.5 });
       }
+
+      // ETA en temps réel (throttlé dans updateETA)
+      this.updateETA();
 
       // Prochain frame
       this.animFrameId = requestAnimationFrame(tick);
